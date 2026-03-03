@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Опрос - Koenigsegg</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .question {
+            background: #f8f8f8;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid #ff0000;
+        }
+        
+        .question h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        
+        .answer-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .yes-no-btn {
+            padding: 0.8rem 2rem;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        
+        .yes-no-btn:hover {
+            background: #ff0000;
+        }
+        
+        .text-input, .number-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            margin: 0.5rem 0;
+        }
+        
+        .text-input:focus, .number-input:focus {
+            outline: none;
+            border-color: #ff0000;
+        }
+        
+        .match-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .match-item {
+            padding: 1rem;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .match-item:hover {
+            border-color: #ff0000;
+        }
+        
+        .match-item.selected {
+            background: #ff0000;
+            color: white;
+            border-color: #ff0000;
+        }
+        
+        .match-item.matched {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .option {
+            padding: 0.8rem;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .option:hover {
+            border-color: #ff0000;
+        }
+        
+        .option.wrong {
+            background: #ffebee;
+            border-color: #f44336;
+            color: #c62828;
+        }
+        
+        .option.correct {
+            background: #e8f5e9;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+        
+        .submit-btn {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: background 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #cc0000;
+        }
+        
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .feedback.correct {
+            border: 4px solid #4CAF50;
+        }
+        
+        .feedback.incorrect {
+            border: 4px solid #f44336;
+        }
+        
+        .feedback h2 {
+            margin-bottom: 1rem;
+            font-size: 2rem;
+        }
+        
+        .feedback p {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .close-feedback {
+            padding: 0.5rem 2rem;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+        
+        .score-display {
+            text-align: center;
+            padding: 1rem;
+            background: #333;
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 2rem;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Koenigsegg Викторина</h1>
+            <p>Проверьте свои знания о шведских гиперкарах</p>
+        </header>
+        
+        <nav>
+            <ul>
+                <li><a href="index.html">Главная</a></li>
+                <li><a href="models.html">Модели</a></li>
+                <li><a href="technology.html">Технологии</a></li>
+                <li><a href="history.html">История</a></li>
+                <li><a href="quiz.html">Опрос</a></li>
+            </ul>
+        </nav>
+        
+        <div class="main-content">
+            <aside class="sidebar">
+                <h3>Типы вопросов</h3>
+                <ul>
+                    <li><a href="#q1">Да/Нет вопросы</a></li>
+                    <li><a href="#q2">Текстовые ответы</a></li>
+                    <li><a href="#q3">Числовые ответы</a></li>
+                    <li><a href="#q4">Сопоставление</a></li>
+                    <li><a href="#q5">Убрать неверный</a></li>
+                </ul>
+            </aside>
+            
+            <main class="content">
+                <div class="quiz-container">
+                    <div class="score-display">
+                        <strong>Ваш результат: <span id="score">0</span> из 5</strong>
+                    </div>
+                    
+                    <div class="question" id="q1">
+                        <h3>1. Основан ли Koenigsegg в Швеции?</h3>
+                        <div class="answer-buttons">
+                            <button class="yes-no-btn" onclick="checkYesNo(true, this)">Да</button>
+                            <button class="yes-no-btn" onclick="checkYesNo(false, this)">Нет</button>
+                        </div>
+                        <p><small>Подсказка: Проверьте страницу истории</small></p>
+                    </div>
+                    
+                    <div class="question" id="q2">
+                        <h3>2. Как зовут основателя Koenigsegg?</h3>
+                        <input type="text" class="text-input" id="textAnswer" placeholder="Введите имя основателя">
+                        <button class="yes-no-btn" onclick="checkTextAnswer()">Проверить</button>
+                        <p><small>Подсказка: Имя состоит из трёх слов</small></p>
+                    </div>
+                    
+                    <div class="question" id="q3">
+                        <h3>3. Какую максимальную скорость развивает Koenigsegg Jesko (в км/ч)?</h3>
+                        <input type="number" class="number-input" id="numberAnswer" placeholder="Введите число">
+                        <button class="yes-no-btn" onclick="checkNumberAnswer()">Проверить</button>
+                        <p><small>Подсказка: Смотрите страницу моделей</small></p>
+                    </div>
+                    
+                    <div class="question" id="q4">
+                        <h3>4. Сопоставьте модели с годами выпуска:</h3>
+                        <p>Выберите год для каждой модели, нажав сначала на модель, затем на год</p>
+                        
+                        <div class="match-container">
+                            <div class="models">
+                                <div class="match-item" onclick="selectItem('Jesko')">Jesko</div>
+                                <div class="match-item" onclick="selectItem('Regera')">Regera</div>
+                                <div class="match-item" onclick="selectItem('Agera')">Agera</div>
+                                <div class="match-item" onclick="selectItem('CC')">CC</div>
+                            </div>
+                            
+                            <div class="years">
+                                <div class="match-item" onclick="selectYear(2000)">2000</div>
+                                <div class="match-item" onclick="selectYear(2010)">2010</div>
+                                <div class="match-item" onclick="selectYear(2015)">2015</div>
+                                <div class="match-item" onclick="selectYear(2019)">2019</div>
+                            </div>
+                        </div>
+                        
+                        <button class="yes-no-btn" onclick="checkMatching()">Проверить сопоставление</button>
+                        <p><small>Подсказка: Смотрите в раздел модели</small></p>
+                    </div>
+                    
+                    <div class="question" id="q5">
+                        <h3>5. Уберите неверный ответ: Какие технологии используются в Koenigsegg?</h3>
+                        <div class="options-container">
+                            <div class="option" onclick="removeWrongOption(this)">Light Speed Transmission (LST)</div>
+                            <div class="option" onclick="removeWrongOption(this)">Система Direct Drive</div>
+                            <div class="option" onclick="removeWrongOption(this)">Двигатель V12</div>
+                            <div class="option" onclick="removeWrongOption(this)">Активная аэродинамика</div>
+                        </div>
+                        <p><small>Подсказка: Уберите 1 вариант ответа</small></p>
+                        <button class="yes-no-btn" onclick="checkRemainingOptions()">Проверить ответ</button>
+                    </div>
+                    
+                    <button class="submit-btn" onclick="showFinalScore()">Завершить опрос</button>
+                </div>
+            </main>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 Koenigsegg Automotive AB. Все права защищены.</p>
+        </footer>
+    </div>
+    
+    <div class="overlay" id="overlay"></div>
+    
+    <div class="feedback" id="feedback">
+        <h2 id="feedback-title">Результат</h2>
+        <p id="feedback-message">Сообщение</p>
+        <button class="close-feedback" onclick="closeFeedback()">Закрыть</button>
+    </div>
+    
+    <script>
+        let score = 0;
+        let selectedModel = null;
+        let selectedYear = null;
+        let matches = {};
+        let removedOptions = [];
+        
+        function checkYesNo(correctAnswer, button) {
+            const isCorrect = (button.textContent === 'Да' && correctAnswer === true);
+            
+            if (isCorrect) {
+                showFeedback('Правильно!', 'Koenigsegg действительно основан в Швеции в 1994 году.', true);
+                if (!document.querySelector('#q1').classList.contains('answered')) {
+                    score++;
+                    updateScore();
+                    document.querySelector('#q1').classList.add('answered');
+                }
+            } else {
+                showFeedback('Ошибочка!', 'Koenigsegg был основан именно в Швеции.', false);
+            }
+        }
+        
+        function checkTextAnswer() {
+            const input = document.getElementById('textAnswer');
+            const answer = input.value.trim().toLowerCase();
+            const correctAnswer = 'кристиан фон кёнигсегг';
+            
+            if (answer === correctAnswer) {
+                showFeedback('Правильно!', 'Основатель компании - Кристиан фон Кёнигсегг.', true);
+                if (!document.querySelector('#q2').classList.contains('answered')) {
+                    score++;
+                    updateScore();
+                    document.querySelector('#q2').classList.add('answered');
+                }
+            } else {
+                showFeedback('Ошибочка!', 'Правильный ответ: Кристиан фон Кёнигсегг.', false);
+            }
+        }
+        
+        function checkNumberAnswer() {
+            const input = document.getElementById('numberAnswer');
+            const answer = parseInt(input.value);
+            const correctAnswer = 483;
+            
+            if (answer === correctAnswer) {
+                showFeedback('Правильно!', 'Jesko развивает скорость до 483 км/ч!', true);
+                if (!document.querySelector('#q3').classList.contains('answered')) {
+                    score++;
+                    updateScore();
+                    document.querySelector('#q3').classList.add('answered');
+                }
+            } else if (answer >= 480 && answer <= 486) {
+                showFeedback('Близко!', `Почти угадали! Правильный ответ: ${correctAnswer} км/ч.`, false);
+            } else {
+                showFeedback('Ошибочка!', `Правильный ответ: ${correctAnswer} км/ч.`, false);
+            }
+        }
+        
+        function selectItem(model) {
+            selectedModel = model;
+            document.querySelectorAll('.models .match-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            if (matches[model]) {
+                selectedYear = matches[model];
+                highlightMatchedYear();
+            }
+        }
+        
+        function selectYear(year) {
+            if (!selectedModel) {
+                showFeedback('Внимание!', 'Сначала выберите модель для сопоставления.', false);
+                return;
+            }
+            
+            selectedYear = year;
+            document.querySelectorAll('.years .match-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            matches[selectedModel] = year;
+            
+            highlightMatches();
+        }
+        
+        function highlightMatches() {
+            document.querySelectorAll('.match-item').forEach(item => {
+                item.classList.remove('matched');
+            });
+            
+            Object.entries(matches).forEach(([model, year]) => {
+                const correctPairs = {
+                    'Jesko': 2019,
+                    'Regera': 2015,
+                    'Agera': 2010,
+                    'CC': 2000
+                };
+                
+                if (correctPairs[model] === year) {
+                    document.querySelectorAll('.models .match-item').forEach(item => {
+                        if (item.textContent === model) {
+                            item.classList.add('matched');
+                        }
+                    });
+                    
+                    document.querySelectorAll('.years .match-item').forEach(item => {
+                        if (parseInt(item.textContent) === year) {
+                            item.classList.add('matched');
+                        }
+                    });
+                }
+            });
+        }
+        
+        function checkMatching() {
+            const correctPairs = {
+                'Jesko': 2019,
+                'Regera': 2015,
+                'Agera': 2010,
+                'CC': 2000
+            };
+            
+            let correctCount = 0;
+            Object.entries(matches).forEach(([model, year]) => {
+                if (correctPairs[model] === year) {
+                    correctCount++;
+                }
+            });
+            
+            if (correctCount === 4) {
+                showFeedback('Правильно!', 'Все пары сопоставлены верно!', true);
+                if (!document.querySelector('#q4').classList.contains('answered')) {
+                    score++;
+                    updateScore();
+                    document.querySelector('#q4').classList.add('answered');
+                }
+            } else {
+                showFeedback('Ошибочка!', `У вас ${correctCount} из 4 правильных сопоставлений.`, false);
+            }
+        }
+        
+        function removeWrongOption(element) {
+            if (removedOptions.length >= 1) return;
+            
+            element.classList.add('wrong');
+            element.style.textDecoration = 'line-through';
+            element.style.opacity = '0.5';
+            removedOptions.push(element);
+        }
+        
+        function checkRemainingOptions() {
+            const options = document.querySelectorAll('#q5 .option');
+            const remaining = Array.from(options).filter(opt => 
+                !opt.classList.contains('wrong')
+            );
+            
+            const correctRemaining = remaining.length === 3;
+            const hasWrongRemoved = Array.from(options).some(opt => 
+                opt.textContent.includes('V12') && opt.classList.contains('wrong')
+            );
+            
+            if (correctRemaining && hasWrongRemoved) {
+                showFeedback('Правильно!', 'Верно! Koenigsegg использует двигатели V8, а не V12.', true);
+                if (!document.querySelector('#q5').classList.contains('answered')) {
+                    score++;
+                    updateScore();
+                    document.querySelector('#q5').classList.add('answered');
+                }
+            } else {
+                showFeedback('Ошибочка!', 'Нужно убрать вариант "Двигатель V12".', false);
+                
+                options.forEach(opt => {
+                    opt.classList.remove('wrong');
+                    opt.style.textDecoration = '';
+                    opt.style.opacity = '';
+                });
+                removedOptions = [];
+            }
+        }
+        
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+        
+        function showFeedback(title, message, isCorrect) {
+            const feedback = document.getElementById('feedback');
+            const overlay = document.getElementById('overlay');
+            
+            document.getElementById('feedback-title').textContent = title;
+            document.getElementById('feedback-message').textContent = message;
+            
+            feedback.classList.remove('correct', 'incorrect');
+            feedback.classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            feedback.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+        
+        function closeFeedback() {
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+        
+        function showFinalScore() {
+            const totalQuestions = 5;
+            const percentage = Math.round((score / totalQuestions) * 100);
+            
+            let message = `Вы ответили правильно на ${score} из ${totalQuestions} вопросов (${percentage}%).\n\n`;
+            
+            if (percentage >= 80) {
+                message += 'Отличный результат! Вы настоящий эксперт по Koenigsegg!';
+            } else if (percentage >= 60) {
+                message += 'Хороший результат! Вы хорошо знаете историю Koenigsegg.';
+            } else if (percentage >= 40) {
+                message += 'Неплохо, но есть куда расти! Изучите разделы сайта подробнее.';
+            } else {
+                message += 'Попробуйте пройти опрос еще раз после изучения материалов сайта!';
+            }
+            
+            showFeedback('Итоговый результат', message, true);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateScore();
+        });
+    </script>
+</body>
+</html>
